@@ -164,13 +164,21 @@ bin.findByReference = function (req, res) {
 };
 
 bin.findAllRequests = function (req, res) {
-    return BinModel.findByReference(req.params.reference,function (err, bin) {
+    var limit = parseInt(req.query.limit) || null;
+    var skip = parseInt(req.query.skip) || 0;
+
+    var options = {};
+    if(limit !== null) {
+        options = {requests: {$slice: [skip, limit]}};
+    }
+
+    return BinModel.findByReference(req.params.reference, options).exec(function (err, bin) {
         if (!err && bin) {
             return res.send(200, bin.requests);
         }
 
         return res.send(500);
-    }).limit(100);
+    });
 };
 
 bin.findLatestRequest = function (req, res) {
